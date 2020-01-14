@@ -29,7 +29,6 @@ namespace ApiConsoleTest
                     Console.WriteLine("Error!!!: " + ex.Message);
                 }
             };
-
             updater.InstallingComplete += (s, e) => { Console.WriteLine("Installed"); };
 
             updater.CheckForUpdate();

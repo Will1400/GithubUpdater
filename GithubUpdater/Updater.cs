@@ -32,10 +32,7 @@ namespace GithubUpdater
             GithubRepositoryName = githubRepositoryName;
         }
 
-        public Updater()
-        {
-
-        }
+        public Updater() { }
 
         async Task GetRepositoryAsync()
         {
@@ -123,7 +120,6 @@ namespace GithubUpdater
                 isDownloadedAssetAFolder = false;
             }
 
-
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
         }
 
@@ -136,10 +132,10 @@ namespace GithubUpdater
             {
                 File.Delete(Path.GetTempPath() + "IdkBackupOfSomething.randombackup");
 
-                Console.WriteLine(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name);
+                // Move current exe to backup.
                 File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "IDKBackupOfSomething.randombackup");
 
-                Console.WriteLine("Moving file");
+                // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
 
             }
