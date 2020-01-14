@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -23,6 +24,7 @@ namespace GithubUpdater
         private Repository repository;
         private bool isDownloadedAssetAFolder;
         private string downloadedAssetPath;
+        private WebClient client;
 
         public Updater(string githubUsername, string githubRepositoryName)
         {
@@ -104,7 +106,7 @@ namespace GithubUpdater
         {
             DownloadingUpdate?.Invoke(this, EventArgs.Empty);
 
-            WebClient client = new WebClient();
+            client = new WebClient();
             string destination = Path.GetTempPath() + repository.Assets[0].Name;
             client.DownloadFile(repository.Assets[0].BrowserDownloadUrl, destination);
 
@@ -130,25 +132,21 @@ namespace GithubUpdater
             InstallingUpdate?.Invoke(this, EventArgs.Empty);
 
 
-            string backupPath = Path.GetTempPath() + "Backup";
+            if (!isDownloadedAssetAFolder)
+            {
+                File.Delete(Path.GetTempPath() + "IdkBackupOfSomething.randombackup");
 
-            if (File.Exists(backupPath))
-            {
-                File.Delete(backupPath);
-            }
+                Console.WriteLine(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name);
+                File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "IDKBackupOfSomething.randombackup");
 
-            Directory.Move(Assembly.GetEntryAssembly().Location, backupPath);
-            if (isDownloadedAssetAFolder)
-            {
-                Directory.Move(downloadedAssetPath, AppDomain.CurrentDomain.BaseDirectory + "Test");
-            }
-            else
-            {
-                File.Move(downloadedAssetPath, AppDomain.CurrentDomain.BaseDirectory + Path.GetFileName(downloadedAssetPath));
+                Console.WriteLine("Moving file");
+                File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
+
             }
 
             InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
+
 
         void ExtractZipFile(string zipLocation, string destinationPath)
         {

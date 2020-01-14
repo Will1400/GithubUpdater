@@ -52,6 +52,11 @@ namespace GithubUpdater
             return false;
         }
 
+        public override string ToString()
+        {
+            return $"{Major}.{Minor}.{Revision}";
+        }
+
         public static Version ConvertToVersion(string version)
         {
             //^\d{1,3}\.\d{1,3}(?:\.\d{1,6})?$
@@ -79,5 +84,6 @@ namespace GithubUpdater
 
             throw new ArgumentException("Version was in a invalid format");
         }
+
     }
 }

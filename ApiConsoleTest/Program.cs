@@ -13,19 +13,29 @@ namespace ApiConsoleTest
             updater.UpdateAvailable += (s, v) =>
             {
                 updater.DownloadUpdate();
-                Console.WriteLine("Update available");
+                Console.WriteLine("Update available: " + v.Version);
             };
 
             updater.DownloadingComplete += (s, e) =>
             {
-                updater.InstallUpdate();
                 Console.WriteLine("Installing update");
+                try
+                {
+                    updater.InstallUpdate();
+                    Environment.Exit(0);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error!!!: " + ex.Message);
+                }
             };
+
+            updater.InstallingComplete += (s, e) => { Console.WriteLine("Installed"); };
 
             updater.CheckForUpdate();
 
 
-            Console.WriteLine("Done");
+            Console.WriteLine("end");
             Console.ReadKey();
         }
     }
