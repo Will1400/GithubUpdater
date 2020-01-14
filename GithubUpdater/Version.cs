@@ -84,6 +84,5 @@ namespace GithubUpdater
 
             throw new ArgumentException("Version was in a invalid format");
         }
-
     }
 }

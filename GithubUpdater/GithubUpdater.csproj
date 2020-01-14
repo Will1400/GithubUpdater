@@ -2,14 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.2</Version>
+    <Version>0.2.1</Version>
     <ApplicationIcon>refresh.ico</ApplicationIcon>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
     <PackageLicenseFile>License.txt</PackageLicenseFile>
+    <PackageTags>Github Updater</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <SignAssembly>false</SignAssembly>
+    <Copyright>Copyright (c) 2020 Will1400</Copyright>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Will1400/GithubUpdater</RepositoryUrl>
+    <RepositoryType>Open Source</RepositoryType>
+    <Description>
+
+
+Icons made by https://www.flaticon.com/authors/srip from https://www.flaticon.com/</Description>
+    <PackageIcon>refresh.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +31,10 @@
 
   <ItemGroup>
     <None Include="License.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\..\..\..\..\Assets\refresh.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
