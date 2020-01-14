@@ -16,6 +16,12 @@ namespace ApiConsoleTest
                 Console.WriteLine("Update available");
             };
 
+            updater.DownloadingComplete += (s, e) =>
+            {
+                updater.InstallUpdate();
+                Console.WriteLine("Installing update");
+            };
+
             updater.CheckForUpdate();
 
 

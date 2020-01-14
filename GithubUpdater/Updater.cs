@@ -21,6 +21,8 @@ namespace GithubUpdater
 
         private const string baseUri = "https://api.github.com/repos/";
         private Repository repository;
+        private bool isDownloadedAssetAFolder;
+        private string downloadedAssetPath;
 
         public Updater(string githubUsername, string githubRepositoryName)
         {
@@ -105,14 +107,57 @@ namespace GithubUpdater
             WebClient client = new WebClient();
             string destination = Path.GetTempPath() + repository.Assets[0].Name;
             client.DownloadFile(repository.Assets[0].BrowserDownloadUrl, destination);
+
+            downloadedAssetPath = destination;
+
             if (Path.GetExtension(destination) == ".zip")
             {
                 ExtractZipFile(destination, destination.Replace(".zip", ""));
+                downloadedAssetPath = destination.Replace(".zip", "");
+                isDownloadedAssetAFolder = true;
             }
+            else
+            {
+                isDownloadedAssetAFolder = false;
+            }
+
+
+            DownloadingComplete?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void InstallUpdate()
+        {
+            InstallingUpdate?.Invoke(this, EventArgs.Empty);
+
+
+            string backupPath = Path.GetTempPath() + "Backup";
+
+            if (File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
+            }
+
+            Directory.Move(Assembly.GetEntryAssembly().Location, backupPath);
+            if (isDownloadedAssetAFolder)
+            {
+                Directory.Move(downloadedAssetPath, AppDomain.CurrentDomain.BaseDirectory + "Test");
+            }
+            else
+            {
+                File.Move(downloadedAssetPath, AppDomain.CurrentDomain.BaseDirectory + Path.GetFileName(downloadedAssetPath));
+            }
+
+            InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
 
         void ExtractZipFile(string zipLocation, string destinationPath)
         {
+            DirectoryInfo directoryInfo = new DirectoryInfo(destinationPath);
+
+            if (directoryInfo.Exists)
+            {
+                directoryInfo.Delete(true);
+            }
             ZipFile.ExtractToDirectory(zipLocation, destinationPath);
         }
     }
