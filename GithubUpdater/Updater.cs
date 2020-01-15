@@ -221,6 +221,10 @@ namespace GithubUpdater
                     // Move downloaded exe to the correct folder.
                     File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", Process.GetCurrentProcess().MainModule.FileName, true);
                 }
+                else
+                {
+                    throw new FileNotFoundException("Backup file not found");
+                }
             });
         }
 

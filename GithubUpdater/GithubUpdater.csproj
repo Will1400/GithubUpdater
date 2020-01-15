@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.4</Version>
+    <Version>0.5</Version>
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>Added RollBack</PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
     <PackageLicenseFile>License.txt</PackageLicenseFile>
@@ -17,18 +17,11 @@
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/Will1400/GithubUpdater</RepositoryUrl>
     <RepositoryType>Open Source</RepositoryType>
-    <Description>
-
-
-Icons made by https://www.flaticon.com/authors/srip from https://www.flaticon.com/</Description>
+    <Description>A updater for github that works with single exe files</Description>
     <PackageIcon></PackageIcon>
     <PackageIconUrl />
     <Win32Resource />
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="refresh.ico" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
