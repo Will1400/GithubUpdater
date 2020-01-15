@@ -167,22 +167,4 @@ namespace GithubUpdater
     {
         public static Repository FromJson(string json) => JsonConvert.DeserializeObject<Repository>(json);
     }
-
-    //public static class Serialize
-    //{
-    //    public static string ToJson(this Repository self) => JsonConvert.SerializeObject(self, GithubUpdater.Converter.Settings);
-    //}
-
-    //internal static class Converter
-    //{
-    //    public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-    //    {
-    //        MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-    //        DateParseHandling = DateParseHandling.None,
-    //        Converters =
-    //        {
-    //            new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-    //        },
-    //    };
-    //}
 }
