@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.2.1</Version>
+    <Version>0.4</Version>
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -21,10 +21,14 @@
 
 
 Icons made by https://www.flaticon.com/authors/srip from https://www.flaticon.com/</Description>
-    <PackageIcon>refresh.png</PackageIcon>
+    <PackageIcon></PackageIcon>
     <PackageIconUrl />
     <Win32Resource />
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="refresh.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
