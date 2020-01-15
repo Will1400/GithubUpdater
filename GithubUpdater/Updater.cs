@@ -69,7 +69,6 @@ namespace GithubUpdater
                 InstallationFailed += async (s, e) => { await RollbackAsync(); };
         }
 
-
         /// <summary>
         /// Gets the repository from github.
         /// </summary>
@@ -128,8 +127,8 @@ namespace GithubUpdater
         /// Gets the the repository, then checks if there is a new version available.
         /// </summary>
         /// <returns>True if there is a new version</returns>
-        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception> 
-        ///  <exception cref="FormatException">Thrown when the version was in a invalid format</exception>
+        /// <exception cref="NullReferenceException">Thrown when the Repository is null</exception> 
+        /// <exception cref="FormatException">Thrown when the version was in a invalid format</exception>
         public async Task<bool> CheckForUpdateAsync()
         {
             await GetRepositoryAsync();
