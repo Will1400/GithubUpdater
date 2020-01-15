@@ -18,6 +18,10 @@ namespace GithubUpdater
         /// </summary>
         public event EventHandler DownloadingUpdate;
         /// <summary>
+        /// Called when the download progressed.
+        /// </summary>
+        public event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressed;
+        /// <summary>
         /// Called when a download is complete
         /// </summary>
         public event EventHandler DownloadingComplete;
@@ -201,11 +205,23 @@ namespace GithubUpdater
                 throw new FileLoadException("The downloaded file is a zip file, which is not supported");
 
             string destination = Path.GetTempPath() + repository.Assets[0].Name;
-            await client.DownloadFileTaskAsync(repository.Assets[0].BrowserDownloadUrl, destination);
             downloadedAssetPath = destination;
+
+            client.DownloadProgressChanged += DownloadProgressChanged;
+            await client.DownloadFileTaskAsync(repository.Assets[0].BrowserDownloadUrl, destination);
 
             State = UpdaterState.Idle;
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Calls the DownloadProgressed event
+        /// </summary>
+        /// <param name="sender">Sender of the event</param>
+        /// <param name="args">Args to be passed to the event</param>
+        public void DownloadProgressChanged(object sender,DownloadProgressChangedEventArgs args)
+        {
+            DownloadProgressed?.Invoke(this, args);
         }
 
         /// <summary>
