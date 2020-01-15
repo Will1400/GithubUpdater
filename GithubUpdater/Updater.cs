@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -11,18 +10,38 @@ namespace GithubUpdater
 {
     public class Updater : IDisposable
     {
+        /// <summary>
+        /// Called when there is a update available
+        /// </summary>
         public event EventHandler<VersionEventArgs> UpdateAvailable;
+        /// <summary>
+        /// Called at the beginning of a download.
+        /// </summary>
         public event EventHandler DownloadingUpdate;
+        /// <summary>
+        /// Called when a download is complete
+        /// </summary>
         public event EventHandler DownloadingComplete;
+        /// <summary>
+        /// Called when installing a update
+        /// </summary>
         public event EventHandler InstallingUpdate;
+        /// <summary>
+        /// Called when a installation is complete
+        /// </summary>
         public event EventHandler InstallingComplete;
 
+        /// <summary>
+        /// The github username of the repository owner.
+        /// </summary>
         public string GithubUsername;
+        /// <summary>
+        /// The github repository name.
+        /// </summary>
         public string GithubRepositoryName;
 
         private const string baseUri = "https://api.github.com/repos/";
         private Repository repository;
-        private bool isDownloadedAssetAFolder;
         private string downloadedAssetPath;
         private WebClient client;
 
@@ -32,8 +51,9 @@ namespace GithubUpdater
             GithubRepositoryName = githubRepositoryName;
         }
 
-        public Updater() { }
-
+        /// <summary>
+        /// Gets the repository from github.
+        /// </summary>
         async Task GetRepositoryAsync()
         {
             if (GithubUsername == null || GithubRepositoryName == null)
@@ -55,6 +75,9 @@ namespace GithubUpdater
             repository = Repository.FromJson(json);
         }
 
+        /// <summary>
+        /// Gets the repository from github.
+        /// </summary>
         void GetRepository()
         {
             if (GithubUsername == null || GithubRepositoryName == null)
@@ -76,6 +99,10 @@ namespace GithubUpdater
             repository = Repository.FromJson(json);
         }
 
+        /// <summary>
+        /// Gets the the repository, then checks if there is a new version available.
+        /// </summary>
+        /// <returns>True if there is a new version</returns>
         public async Task<bool> CheckForUpdateAsync()
         {
             await GetRepositoryAsync();
@@ -95,6 +122,10 @@ namespace GithubUpdater
             return false;
         }
 
+        /// <summary>
+        /// Gets the the repository, then checks if there is a new version available.
+        /// </summary>
+        /// <returns>True if there is a new version</returns>
         public bool CheckForUpdate()
         {
             GetRepository();
@@ -114,31 +145,32 @@ namespace GithubUpdater
             return false;
         }
 
+        /// <summary>
+        /// Downloads the new EXE from github.
+        /// </summary>
+        /// <returns>Awaitable Task</returns>
         public void DownloadUpdate()
         {
             DownloadingUpdate?.Invoke(this, EventArgs.Empty);
 
             if (client == null)
                 client = new WebClient();
+            if (repository == null)
+                throw new NullReferenceException("Could not retrieve Repository");
+            if (repository.Assets[0].Name.EndsWith(".zip"))
+                throw new FileLoadException("The downloaded file is a zip file, which is not supported");
 
             string destination = Path.GetTempPath() + repository.Assets[0].Name;
             client.DownloadFile(repository.Assets[0].BrowserDownloadUrl, destination);
             downloadedAssetPath = destination;
 
-            if (Path.GetExtension(destination) == ".zip")
-            {
-                ExtractZipFile(destination, destination.Replace(".zip", ""));
-                downloadedAssetPath = destination.Replace(".zip", "");
-                isDownloadedAssetAFolder = true;
-            }
-            else
-            {
-                isDownloadedAssetAFolder = false;
-            }
-
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Downloads the new EXE from github.
+        /// </summary>
+        /// <returns>Awaitable Task</returns>
         public async Task DownloadUpdateAsync()
         {
             DownloadingUpdate?.Invoke(this, EventArgs.Empty);
@@ -147,25 +179,20 @@ namespace GithubUpdater
                 client = new WebClient();
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
+            if (repository.Assets[0].Name.EndsWith(".zip"))
+                throw new FileLoadException("The downloaded file is a zip file, which is not supported");
 
             string destination = Path.GetTempPath() + repository.Assets[0].Name;
             await client.DownloadFileTaskAsync(repository.Assets[0].BrowserDownloadUrl, destination);
             downloadedAssetPath = destination;
 
-            if (Path.GetExtension(destination) == ".zip")
-            {
-                await ExtractZipFileAsync(destination, destination.Replace(".zip", ""));
-                downloadedAssetPath = destination.Replace(".zip", "");
-                isDownloadedAssetAFolder = true;
-            }
-            else
-            {
-                isDownloadedAssetAFolder = false;
-            }
 
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Makes a backup of the current EXE, then overwrites it with the new EXE.
+        /// </summary>
         public void InstallUpdate()
         {
             InstallingUpdate?.Invoke(this, EventArgs.Empty);
@@ -173,21 +200,21 @@ namespace GithubUpdater
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
 
-            if (!isDownloadedAssetAFolder)
-            {
                 File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                 // Move current exe to backup.
-                File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "GithubUpdaterBackup.backup");
+                File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                 // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
-            }
 
             InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
 
-
+        /// <summary>
+        /// Makes a backup of the current EXE, then overwrites it with the new EXE.
+        /// </summary>
+        /// <returns>Awaitable Task</returns>
         public async Task InstallUpdateAsync()
         {
             InstallingUpdate?.Invoke(this, EventArgs.Empty);
@@ -197,21 +224,20 @@ namespace GithubUpdater
 
             await Task.Run(() =>
             {
-                if (!isDownloadedAssetAFolder)
-                {
-                    File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
-
                     // Move current exe to backup.
-                    File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "GithubUpdaterBackup.backup");
+                    File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup", true);
 
                     // Move downloaded exe to the correct folder.
                     File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
-                }
             });
 
             InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Replaces the current EXE with a backup
+        /// </summary>
+        /// <returns>Awaitable Task</returns>
         public async Task RollbackAsync()
         {
             await Task.Run(() =>
@@ -225,31 +251,6 @@ namespace GithubUpdater
                 {
                     throw new FileNotFoundException("Backup file not found");
                 }
-            });
-        }
-
-        void ExtractZipFile(string zipLocation, string destinationPath)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(destinationPath);
-
-            if (directoryInfo.Exists)
-            {
-                directoryInfo.Delete(true);
-            }
-            ZipFile.ExtractToDirectory(zipLocation, destinationPath);
-        }
-
-        async Task ExtractZipFileAsync(string zipLocation, string destinationPath)
-        {
-            await Task.Run(() =>
-            {
-                DirectoryInfo directoryInfo = new DirectoryInfo(destinationPath);
-
-                if (directoryInfo.Exists)
-                {
-                    directoryInfo.Delete(true);
-                }
-                ZipFile.ExtractToDirectory(zipLocation, destinationPath);
             });
         }
 
