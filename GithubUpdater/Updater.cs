@@ -312,6 +312,11 @@ namespace GithubUpdater
                 DownloadingStarted -= (EventHandler)item;
             }
             DownloadingStarted = null;
+            foreach (Delegate item in DownloadProgressed.GetInvocationList())
+            {
+                DownloadProgressed -= (EventHandler<DownloadProgressEventArgs>)item;
+            }
+            DownloadProgressed = null;
             foreach (Delegate item in DownloadingCompleted.GetInvocationList())
             {
                 DownloadingCompleted -= (EventHandler)item;
