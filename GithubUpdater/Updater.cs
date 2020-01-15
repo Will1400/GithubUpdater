@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GithubUpdater
 {
-    public class Updater
+    public class Updater : IDisposable
     {
         public event EventHandler<VersionEventArgs> UpdateAvailable;
         public event EventHandler DownloadingUpdate;
@@ -235,6 +235,39 @@ namespace GithubUpdater
                 }
                 ZipFile.ExtractToDirectory(zipLocation, destinationPath);
             });
+        }
+
+        public void Dispose()
+        {
+            repository = null;
+            client.Dispose();
+            
+            // Remove all listeners to events
+            foreach (Delegate item in UpdateAvailable.GetInvocationList())
+            {
+                UpdateAvailable -= (EventHandler<VersionEventArgs>)item;   
+            }
+            UpdateAvailable = null;
+            foreach (Delegate item in DownloadingUpdate.GetInvocationList())
+            {
+                DownloadingUpdate -= (EventHandler)item;
+            }
+            DownloadingUpdate = null;
+            foreach (Delegate item in DownloadingComplete.GetInvocationList())
+            {
+                DownloadingComplete -= (EventHandler)item;
+            }
+            DownloadingComplete = null;
+            foreach (Delegate item in InstallingUpdate.GetInvocationList())
+            {
+                InstallingUpdate -= (EventHandler)item;
+            }
+            InstallingUpdate = null;
+            foreach (Delegate item in InstallingComplete.GetInvocationList())
+            {
+                InstallingComplete -= (EventHandler)item;
+            }
+            InstallingComplete = null;
         }
     }
 }
