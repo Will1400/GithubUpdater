@@ -6,7 +6,13 @@ namespace GithubUpdater
 {
     public class DownloadProgressEventArgs : EventArgs
     {
+        /// <summary>
+        /// Gets the bytes received of the download.
+        /// </summary>
         public long BytesReceived { get; set; }
+        /// <summary>
+        /// Gets the total size of the download.
+        /// </summary>
         public long TotalBytesToReceive { get; set; }
         /// <summary>
         /// The current Progress in percent

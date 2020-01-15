@@ -6,7 +6,8 @@
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Added state for the uploader &amp; added  event for DownloadProgressed</PackageReleaseNotes>
+    <PackageReleaseNotes>Added DownloadProgressEventArgs
+</PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
     <PackageLicenseFile>License.txt</PackageLicenseFile>
