@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Version>0.2.1</Version>
-    <ApplicationIcon>refresh.ico</ApplicationIcon>
+    <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes></PackageReleaseNotes>
@@ -23,6 +23,7 @@
 Icons made by https://www.flaticon.com/authors/srip from https://www.flaticon.com/</Description>
     <PackageIcon>refresh.png</PackageIcon>
     <PackageIconUrl />
+    <Win32Resource />
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,10 +32,6 @@ Icons made by https://www.flaticon.com/authors/srip from https://www.flaticon.co
 
   <ItemGroup>
     <None Include="License.txt">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\..\..\..\..\Assets\refresh.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
