@@ -7,6 +7,7 @@ namespace ApiConsoleTest
     {
         static void Main(string[] args)
         {
+
             //Updater updater = new Updater("domialex", "sidekick");
             Updater updater = new Updater("will1400", "ReleaseApiTest");
 
@@ -22,14 +23,17 @@ namespace ApiConsoleTest
                 try
                 {
                     updater.InstallUpdate();
-                    Environment.Exit(0);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error!!!: " + ex.Message);
                 }
             };
-            updater.InstallingComplete += (s, e) => { Console.WriteLine("Installed"); };
+            updater.InstallingComplete += async (s, e) =>
+            {
+                Console.WriteLine("Installed");
+                await updater.RollbackAsync();
+            };
 
             updater.CheckForUpdate();
 

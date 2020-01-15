@@ -175,10 +175,10 @@ namespace GithubUpdater
 
             if (!isDownloadedAssetAFolder)
             {
-                File.Delete(Path.GetTempPath() + "IdkBackupOfSomething.randombackup");
+                File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                 // Move current exe to backup.
-                File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "IDKBackupOfSomething.randombackup");
+                File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                 // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
@@ -199,10 +199,10 @@ namespace GithubUpdater
             {
                 if (!isDownloadedAssetAFolder)
                 {
-                    File.Delete(Path.GetTempPath() + "IdkBackupOfSomething.randombackup");
+                    File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                     // Move current exe to backup.
-                    File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "IDKBackupOfSomething.randombackup");
+                    File.Move(Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
                     // Move downloaded exe to the correct folder.
                     File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
@@ -210,6 +210,18 @@ namespace GithubUpdater
             });
 
             InstallingComplete?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task RollbackAsync()
+        {
+            await Task.Run(() =>
+            {
+                if (File.Exists(Path.GetTempPath() + "GithubUpdaterBackup.backup"))
+                {
+                    // Move downloaded exe to the correct folder.
+                    File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", Process.GetCurrentProcess().MainModule.FileName, true);
+                }
+            });
         }
 
         void ExtractZipFile(string zipLocation, string destinationPath)
