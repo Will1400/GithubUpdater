@@ -20,7 +20,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called when the download progressed.
         /// </summary>
-        public event EventHandler<DownloadProgressEventArgs> DownloadProgressed;
+        public event EventHandler<DownloadProgressEventArgs> DownloadingProgressed;
         /// <summary>
         /// Called when a download is complete
         /// </summary>
@@ -28,7 +28,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called when installing a update has started
         /// </summary>
-        public event EventHandler InstallingUpdateStarted;
+        public event EventHandler InstallationStarted;
         /// <summary>
         /// Called when the installation failed
         /// </summary>
@@ -36,7 +36,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called when a installation is completed
         /// </summary>
-        public event EventHandler InstallingCompleted;
+        public event EventHandler InstallationCompleted;
 
         /// <summary>
         /// The github username of the repository owner.
@@ -128,6 +128,8 @@ namespace GithubUpdater
         /// Gets the the repository, then checks if there is a new version available.
         /// </summary>
         /// <returns>True if there is a new version</returns>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception> 
+        ///  <exception cref="FormatException">Thrown when the version was in a invalid format</exception>
         public async Task<bool> CheckForUpdateAsync()
         {
             await GetRepositoryAsync();
@@ -155,6 +157,8 @@ namespace GithubUpdater
         /// Gets the the repository, then checks if there is a new version available.
         /// </summary>
         /// <returns>True if there is a new version</returns>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
+        ///  <exception cref="FormatException">Thrown when the version was in a invalid format</exception>
         public bool CheckForUpdate()
         {
             GetRepository();
@@ -182,6 +186,8 @@ namespace GithubUpdater
         /// Downloads the new EXE from github.
         /// </summary>
         /// <returns>Awaitable Task</returns>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
+        ///  <exception cref="FileLoadException">Thrown when the asset file is a .zip</exception>
         public void DownloadUpdate()
         {
             DownloadingStarted?.Invoke(this, EventArgs.Empty);
@@ -206,6 +212,8 @@ namespace GithubUpdater
         /// Downloads the new EXE from github.
         /// </summary>
         /// <returns>Awaitable Task</returns>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
+        ///  <exception cref="FileLoadException">Thrown when the asset file is a .zip</exception>
         public async Task DownloadUpdateAsync()
         {
             DownloadingStarted?.Invoke(this, EventArgs.Empty);
@@ -235,15 +243,16 @@ namespace GithubUpdater
         /// <param name="args">Args to be passed to the event</param>
         void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs args)
         {
-            DownloadProgressed?.Invoke(this, new DownloadProgressEventArgs(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive));
+            DownloadingProgressed?.Invoke(this, new DownloadProgressEventArgs(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive));
         }
 
         /// <summary>
         /// Makes a backup of the current EXE, then overwrites it with the new EXE.
         /// </summary>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
         public void InstallUpdate()
         {
-            InstallingUpdateStarted?.Invoke(this, EventArgs.Empty);
+            InstallationStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Installing;
 
             if (repository == null)
@@ -263,16 +272,17 @@ namespace GithubUpdater
             }
 
             State = UpdaterState.Idle;
-            InstallingCompleted?.Invoke(this, EventArgs.Empty);
+            InstallationCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
         /// Makes a backup of the current EXE, then overwrites it with the new EXE.
         /// </summary>
         /// <returns>Awaitable Task</returns>
+        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
         public async Task InstallUpdateAsync()
         {
-            InstallingUpdateStarted?.Invoke(this, EventArgs.Empty);
+            InstallationStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Installing;
 
             if (repository == null)
@@ -295,13 +305,14 @@ namespace GithubUpdater
             }
 
             State = UpdaterState.Idle;
-            InstallingCompleted?.Invoke(this, EventArgs.Empty);
+            InstallationCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
         /// Replaces the current EXE with a backup
         /// </summary>
         /// <returns>Awaitable Task</returns>
+        ///  <exception cref="FileNotFoundException">Thrown when the backup file could not be found</exception>
         public async Task RollbackAsync()
         {
             await Task.Run(() =>
@@ -338,31 +349,31 @@ namespace GithubUpdater
                 DownloadingStarted -= (EventHandler)item;
             }
             DownloadingStarted = null;
-            foreach (Delegate item in DownloadProgressed.GetInvocationList())
+            foreach (Delegate item in DownloadingProgressed.GetInvocationList())
             {
-                DownloadProgressed -= (EventHandler<DownloadProgressEventArgs>)item;
+                DownloadingProgressed -= (EventHandler<DownloadProgressEventArgs>)item;
             }
-            DownloadProgressed = null;
+            DownloadingProgressed = null;
             foreach (Delegate item in DownloadingCompleted.GetInvocationList())
             {
                 DownloadingCompleted -= (EventHandler)item;
             }
             DownloadingCompleted = null;
-            foreach (Delegate item in InstallingUpdateStarted.GetInvocationList())
+            foreach (Delegate item in InstallationStarted.GetInvocationList())
             {
-                InstallingUpdateStarted -= (EventHandler)item;
+                InstallationStarted -= (EventHandler)item;
             }
-            InstallingUpdateStarted = null;
+            InstallationStarted = null;
             foreach (Delegate item in InstallationFailed.GetInvocationList())
             {
                 InstallationFailed -= (EventHandler)item;
             }
             InstallationFailed = null;
-            foreach (Delegate item in InstallingCompleted.GetInvocationList())
+            foreach (Delegate item in InstallationCompleted.GetInvocationList())
             {
-                InstallingCompleted -= (EventHandler)item;
+                InstallationCompleted -= (EventHandler)item;
             }
-            InstallingCompleted = null;
+            InstallationCompleted = null;
         }
     }
 }

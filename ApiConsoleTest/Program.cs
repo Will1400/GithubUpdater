@@ -29,7 +29,7 @@ namespace ApiConsoleTest
                     Console.WriteLine("Error!!!: " + ex.Message);
                 }
             };
-            updater.InstallingCompleted += async (s, e) =>
+            updater.InstallationCompleted += async (s, e) =>
             {
                 Console.WriteLine("Installed");
                 await updater.RollbackAsync();
