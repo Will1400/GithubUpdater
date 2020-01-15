@@ -6,11 +6,14 @@ namespace GithubUpdater
 {
     public class VersionEventArgs : EventArgs
     {
-        public VersionEventArgs(Version version)
+        public VersionEventArgs(Version newVersion, Version currentVersion)
         {
-            Version = version;
+            NewVersion = newVersion;
+            CurrentVersion = currentVersion;
         }
 
-        public Version Version { get; set; }
+        public Version NewVersion { get; private set; }
+
+        public Version CurrentVersion { get; private set; }
     }
 }

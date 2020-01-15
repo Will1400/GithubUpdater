@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.5.4</Version>
+    <Version>0.6.1</Version>
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Removed the need for Newtonsoft.Json</PackageReleaseNotes>
+    <PackageReleaseNotes>Added state for the uploader &amp; added  event for DownloadProgressed</PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
     <PackageLicenseFile>License.txt</PackageLicenseFile>

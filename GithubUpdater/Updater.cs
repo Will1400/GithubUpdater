@@ -16,7 +16,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called at the beginning of a download.
         /// </summary>
-        public event EventHandler DownloadingUpdate;
+        public event EventHandler DownloadingStarted;
         /// <summary>
         /// Called when the download progressed.
         /// </summary>
@@ -24,15 +24,15 @@ namespace GithubUpdater
         /// <summary>
         /// Called when a download is complete
         /// </summary>
-        public event EventHandler DownloadingComplete;
+        public event EventHandler DownloadingCompleted;
         /// <summary>
-        /// Called when installing a update
+        /// Called when installing a update has started
         /// </summary>
-        public event EventHandler InstallingUpdate;
+        public event EventHandler InstallingUpdateStarted;
         /// <summary>
-        /// Called when a installation is complete
+        /// Called when a installation is completed
         /// </summary>
-        public event EventHandler InstallingComplete;
+        public event EventHandler InstallingCompleted;
 
         /// <summary>
         /// The github username of the repository owner.
@@ -128,7 +128,7 @@ namespace GithubUpdater
 
             if (currentVersion < newestVersion)
             {
-                UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion));
+                UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion, currentVersion));
                 State = UpdaterState.Idle;
                 return true;
             }
@@ -155,7 +155,7 @@ namespace GithubUpdater
 
             if (currentVersion < newestVersion)
             {
-                UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion));
+                UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion, currentVersion));
                 State = UpdaterState.Idle;
                 return true;
             }
@@ -170,7 +170,7 @@ namespace GithubUpdater
         /// <returns>Awaitable Task</returns>
         public void DownloadUpdate()
         {
-            DownloadingUpdate?.Invoke(this, EventArgs.Empty);
+            DownloadingStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Downloading;
 
             if (client == null)
@@ -185,7 +185,7 @@ namespace GithubUpdater
             downloadedAssetPath = destination;
 
             State = UpdaterState.Idle;
-            DownloadingComplete?.Invoke(this, EventArgs.Empty);
+            DownloadingCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace GithubUpdater
         /// <returns>Awaitable Task</returns>
         public async Task DownloadUpdateAsync()
         {
-            DownloadingUpdate?.Invoke(this, EventArgs.Empty);
+            DownloadingStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Downloading;
 
             if (client == null)
@@ -211,7 +211,7 @@ namespace GithubUpdater
             await client.DownloadFileTaskAsync(repository.Assets[0].BrowserDownloadUrl, destination);
 
             State = UpdaterState.Idle;
-            DownloadingComplete?.Invoke(this, EventArgs.Empty);
+            DownloadingCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace GithubUpdater
         /// </summary>
         public void InstallUpdate()
         {
-            InstallingUpdate?.Invoke(this, EventArgs.Empty);
+            InstallingUpdateStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Installing;
 
             if (repository == null)
@@ -244,7 +244,7 @@ namespace GithubUpdater
             File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
 
             State = UpdaterState.Idle;
-            InstallingComplete?.Invoke(this, EventArgs.Empty);
+            InstallingCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace GithubUpdater
         /// <returns>Awaitable Task</returns>
         public async Task InstallUpdateAsync()
         {
-            InstallingUpdate?.Invoke(this, EventArgs.Empty);
+            InstallingUpdateStarted?.Invoke(this, EventArgs.Empty);
             State = UpdaterState.Installing;
 
             if (repository == null)
@@ -269,7 +269,7 @@ namespace GithubUpdater
             });
 
             State = UpdaterState.Idle;
-            InstallingComplete?.Invoke(this, EventArgs.Empty);
+            InstallingCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -307,26 +307,26 @@ namespace GithubUpdater
                 UpdateAvailable -= (EventHandler<VersionEventArgs>)item;
             }
             UpdateAvailable = null;
-            foreach (Delegate item in DownloadingUpdate.GetInvocationList())
+            foreach (Delegate item in DownloadingStarted.GetInvocationList())
             {
-                DownloadingUpdate -= (EventHandler)item;
+                DownloadingStarted -= (EventHandler)item;
             }
-            DownloadingUpdate = null;
-            foreach (Delegate item in DownloadingComplete.GetInvocationList())
+            DownloadingStarted = null;
+            foreach (Delegate item in DownloadingCompleted.GetInvocationList())
             {
-                DownloadingComplete -= (EventHandler)item;
+                DownloadingCompleted -= (EventHandler)item;
             }
-            DownloadingComplete = null;
-            foreach (Delegate item in InstallingUpdate.GetInvocationList())
+            DownloadingCompleted = null;
+            foreach (Delegate item in InstallingUpdateStarted.GetInvocationList())
             {
-                InstallingUpdate -= (EventHandler)item;
+                InstallingUpdateStarted -= (EventHandler)item;
             }
-            InstallingUpdate = null;
-            foreach (Delegate item in InstallingComplete.GetInvocationList())
+            InstallingUpdateStarted = null;
+            foreach (Delegate item in InstallingCompleted.GetInvocationList())
             {
-                InstallingComplete -= (EventHandler)item;
+                InstallingCompleted -= (EventHandler)item;
             }
-            InstallingComplete = null;
+            InstallingCompleted = null;
         }
     }
 }

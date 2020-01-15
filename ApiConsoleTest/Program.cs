@@ -14,10 +14,10 @@ namespace ApiConsoleTest
             updater.UpdateAvailable += (s, v) =>
             {
                 updater.DownloadUpdate();
-                Console.WriteLine("Update available: " + v.Version);
+                Console.WriteLine("Update available: " + v.NewVersion);
             };
 
-            updater.DownloadingComplete += (s, e) =>
+            updater.DownloadingCompleted += (s, e) =>
             {
                 Console.WriteLine("Installing update");
                 try
@@ -29,7 +29,7 @@ namespace ApiConsoleTest
                     Console.WriteLine("Error!!!: " + ex.Message);
                 }
             };
-            updater.InstallingComplete += async (s, e) =>
+            updater.InstallingCompleted += async (s, e) =>
             {
                 Console.WriteLine("Installed");
                 await updater.RollbackAsync();
