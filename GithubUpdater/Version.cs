@@ -73,7 +73,7 @@ namespace GithubUpdater
         public static Version ConvertToVersion(string version)
         {
             //^\d{1,3}\.\d{1,3}(?:\.\d{1,6})?$
-            version = version.Replace("v", "", true, CultureInfo.InvariantCulture);
+            version = version.Replace("v", "", true, CultureInfo.InvariantCulture).Split("-")[0];
 
             Regex regex = new Regex(@"\d+(?:\.\d+)+");
 

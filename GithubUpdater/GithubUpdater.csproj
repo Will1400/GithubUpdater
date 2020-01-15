@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.6.9</Version>
+    <Version>0.7</Version>
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Added InstallationFailed event.
+    <PackageReleaseNotes>Added Exception documentation
+Added IEquatable&lt;Version&gt;
 </PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
