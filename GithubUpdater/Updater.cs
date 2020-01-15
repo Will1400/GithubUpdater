@@ -20,7 +20,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called when the download progressed.
         /// </summary>
-        public event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressed;
+        public event EventHandler<DownloadProgressEventArgs> DownloadProgressed;
         /// <summary>
         /// Called when a download is complete
         /// </summary>
@@ -219,9 +219,9 @@ namespace GithubUpdater
         /// </summary>
         /// <param name="sender">Sender of the event</param>
         /// <param name="args">Args to be passed to the event</param>
-        public void DownloadProgressChanged(object sender,DownloadProgressChangedEventArgs args)
+        void DownloadProgressChanged(object sender,DownloadProgressChangedEventArgs args)
         {
-            DownloadProgressed?.Invoke(this, args);
+            DownloadProgressed?.Invoke(this, new DownloadProgressEventArgs(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive));
         }
 
         /// <summary>
