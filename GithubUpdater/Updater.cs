@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -40,6 +39,8 @@ namespace GithubUpdater
         /// </summary>
         public string GithubRepositoryName;
 
+        public UpdaterState State { get; private set; }
+
         private const string baseUri = "https://api.github.com/repos/";
         private Repository repository;
         private string downloadedAssetPath;
@@ -59,6 +60,8 @@ namespace GithubUpdater
             if (GithubUsername == null || GithubRepositoryName == null)
                 return;
 
+            State = UpdaterState.GettingRepository;
+
             Uri uri = new Uri(baseUri + $"{GithubUsername}/{GithubRepositoryName}/releases/latest");
             string json;
 
@@ -73,6 +76,7 @@ namespace GithubUpdater
             }
 
             repository = Repository.FromJson(json);
+            State = UpdaterState.Idle;
         }
 
         /// <summary>
@@ -82,6 +86,8 @@ namespace GithubUpdater
         {
             if (GithubUsername == null || GithubRepositoryName == null)
                 return;
+
+            State = UpdaterState.GettingRepository;
 
             Uri uri = new Uri(baseUri + $"{GithubUsername}/{GithubRepositoryName}/releases/latest");
             string json;
@@ -97,6 +103,7 @@ namespace GithubUpdater
             }
 
             repository = Repository.FromJson(json);
+            State = UpdaterState.Idle;
         }
 
         /// <summary>
@@ -110,15 +117,19 @@ namespace GithubUpdater
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
 
+            State = UpdaterState.CheckingForUpdate;
+
             Version currentVersion = Version.ConvertToVersion(Assembly.GetEntryAssembly().GetName().Version.ToString());
             Version newestVersion = Version.ConvertToVersion(repository.TagName);
 
             if (currentVersion < newestVersion)
             {
                 UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion));
+                State = UpdaterState.Idle;
                 return true;
             }
 
+            State = UpdaterState.Idle;
             return false;
         }
 
@@ -133,15 +144,19 @@ namespace GithubUpdater
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
 
+            State = UpdaterState.CheckingForUpdate;
+
             Version currentVersion = Version.ConvertToVersion(Assembly.GetEntryAssembly().GetName().Version.ToString());
             Version newestVersion = Version.ConvertToVersion(repository.TagName);
 
             if (currentVersion < newestVersion)
             {
                 UpdateAvailable?.Invoke(this, new VersionEventArgs(newestVersion));
+                State = UpdaterState.Idle;
                 return true;
             }
 
+            State = UpdaterState.Idle;
             return false;
         }
 
@@ -152,6 +167,7 @@ namespace GithubUpdater
         public void DownloadUpdate()
         {
             DownloadingUpdate?.Invoke(this, EventArgs.Empty);
+            State = UpdaterState.Downloading;
 
             if (client == null)
                 client = new WebClient();
@@ -164,6 +180,7 @@ namespace GithubUpdater
             client.DownloadFile(repository.Assets[0].BrowserDownloadUrl, destination);
             downloadedAssetPath = destination;
 
+            State = UpdaterState.Idle;
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
         }
 
@@ -174,6 +191,7 @@ namespace GithubUpdater
         public async Task DownloadUpdateAsync()
         {
             DownloadingUpdate?.Invoke(this, EventArgs.Empty);
+            State = UpdaterState.Downloading;
 
             if (client == null)
                 client = new WebClient();
@@ -186,7 +204,7 @@ namespace GithubUpdater
             await client.DownloadFileTaskAsync(repository.Assets[0].BrowserDownloadUrl, destination);
             downloadedAssetPath = destination;
 
-
+            State = UpdaterState.Idle;
             DownloadingComplete?.Invoke(this, EventArgs.Empty);
         }
 
@@ -196,18 +214,20 @@ namespace GithubUpdater
         public void InstallUpdate()
         {
             InstallingUpdate?.Invoke(this, EventArgs.Empty);
+            State = UpdaterState.Installing;
 
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
 
-                File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
+            File.Delete(Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
-                // Move current exe to backup.
-                File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup");
+            // Move current exe to backup.
+            File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup");
 
-                // Move downloaded exe to the correct folder.
-                File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
+            // Move downloaded exe to the correct folder.
+            File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
 
+            State = UpdaterState.Idle;
             InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
 
@@ -218,19 +238,21 @@ namespace GithubUpdater
         public async Task InstallUpdateAsync()
         {
             InstallingUpdate?.Invoke(this, EventArgs.Empty);
+            State = UpdaterState.Installing;
 
             if (repository == null)
                 throw new NullReferenceException("Could not retrieve Repository");
 
             await Task.Run(() =>
             {
-                    // Move current exe to backup.
-                    File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup", true);
+                // Move current exe to backup.
+                File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup", true);
 
-                    // Move downloaded exe to the correct folder.
-                    File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
+                // Move downloaded exe to the correct folder.
+                File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
             });
 
+            State = UpdaterState.Idle;
             InstallingComplete?.Invoke(this, EventArgs.Empty);
         }
 
@@ -244,8 +266,12 @@ namespace GithubUpdater
             {
                 if (File.Exists(Path.GetTempPath() + "GithubUpdaterBackup.backup"))
                 {
+                    State = UpdaterState.RollingBack;
+
                     // Move downloaded exe to the correct folder.
                     File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", Process.GetCurrentProcess().MainModule.FileName, true);
+
+                    State = UpdaterState.Idle;
                 }
                 else
                 {
@@ -258,11 +284,11 @@ namespace GithubUpdater
         {
             repository = null;
             client.Dispose();
-            
+
             // Remove all listeners to events
             foreach (Delegate item in UpdateAvailable.GetInvocationList())
             {
-                UpdateAvailable -= (EventHandler<VersionEventArgs>)item;   
+                UpdateAvailable -= (EventHandler<VersionEventArgs>)item;
             }
             UpdateAvailable = null;
             foreach (Delegate item in DownloadingUpdate.GetInvocationList())
