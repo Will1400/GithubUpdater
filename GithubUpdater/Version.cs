@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace GithubUpdater
 {
-    public class Version
+    public class Version : IEquatable<Version>
     {
         public int Major { get; set; }
         public int Minor { get; set; }
@@ -50,6 +51,20 @@ namespace GithubUpdater
             return false;
         }
 
+        public static bool operator ==(Version first, Version second)
+        {
+            if (first.Major == second.Major && first.Minor == second.Minor && first.Revision == second.Revision)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(Version first, Version second)
+        {
+            if (first.Major == second.Major && first.Minor == second.Minor && first.Revision == second.Revision)
+                return true;
+            return false;
+        }
+
         public override string ToString()
         {
             return $"{Major}.{Minor}.{Revision}";
@@ -81,6 +96,24 @@ namespace GithubUpdater
             }
 
             throw new FormatException("Version was in a invalid format");
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Version);
+        }
+
+        public bool Equals([AllowNull] Version other)
+        {
+            return other != null &&
+                   Major == other.Major &&
+                   Minor == other.Minor &&
+                   Revision == other.Revision;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Major, Minor, Revision);
         }
     }
 }
