@@ -58,6 +58,8 @@ namespace GithubUpdater
         private WebClient client;
         private string originalInstallPath;
 
+        private string backupFileName = "GithubUpdaterBackup.backup";
+
         public Updater(string githubUsername, string githubRepositoryName)
         {
             GithubUsername = githubUsername;
@@ -262,7 +264,7 @@ namespace GithubUpdater
 
             try
             {
-                string tempPath = Path.GetTempPath() + "GithubUpdaterBackup.backup";
+                string tempPath = Path.GetTempPath() + backupFileName;
                 if (File.Exists(tempPath))
                     File.Delete(tempPath);
 
@@ -275,6 +277,7 @@ namespace GithubUpdater
             catch (Exception ex)
             {
                 InstallationFailed?.Invoke(this, new ExceptionEventArgs<Exception>(ex, ex.Message));
+                return;
             }
 
             State = UpdaterState.Idle;
@@ -298,7 +301,7 @@ namespace GithubUpdater
             {
                 await Task.Run(() =>
                                {
-                                   string tempPath = Path.GetTempPath() + "GithubUpdaterBackup.backup";
+                                   string tempPath = Path.GetTempPath() + backupFileName;
                                    if (File.Exists(tempPath))
                                        File.Delete(tempPath);
 
@@ -312,6 +315,7 @@ namespace GithubUpdater
             catch (Exception ex)
             {
                 InstallationFailed?.Invoke(this, new ExceptionEventArgs<Exception>(ex, ex.Message));
+                return;
             }
 
             State = UpdaterState.Idle;
@@ -329,12 +333,12 @@ namespace GithubUpdater
             {
                 await Task.Run(() =>
                              {
-                                 if (File.Exists(Path.GetTempPath() + "GithubUpdaterBackup.backup"))
+                                 if (File.Exists(Path.GetTempPath() + backupFileName))
                                  {
                                      State = UpdaterState.RollingBack;
 
                                      // Move downloaded exe to the correct folder.
-                                     File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", originalInstallPath, true);
+                                     File.Move(Path.GetTempPath() + backupFileName, originalInstallPath, true);
 
                                      State = UpdaterState.Idle;
                                  }
