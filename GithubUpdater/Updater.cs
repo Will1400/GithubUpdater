@@ -299,18 +299,19 @@ namespace GithubUpdater
 
             try
             {
-                await Task.Run(() =>
-                               {
-                                   string tempPath = Path.GetTempPath() + backupFileName;
-                                   if (File.Exists(tempPath))
-                                       File.Delete(tempPath);
+                string tempPath = Path.GetTempPath() + backupFileName;
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
 
-                                   // Move current exe to backup.
-                                   File.Move(originalInstallPath, tempPath);
+                await Task.Delay(200);
 
-                                   // Move downloaded exe to the correct folder.
-                                   File.Move(downloadedAssetPath, originalInstallPath);
-                               });
+                // Move current exe to backup.
+                File.Move(originalInstallPath, tempPath);
+
+                await Task.Delay(200);
+
+                // Move downloaded exe to the correct folder.
+                File.Move(downloadedAssetPath, originalInstallPath);
             }
             catch (Exception ex)
             {
@@ -331,22 +332,19 @@ namespace GithubUpdater
         {
             try
             {
-                await Task.Run(() =>
-                             {
-                                 if (File.Exists(Path.GetTempPath() + backupFileName))
-                                 {
-                                     State = UpdaterState.RollingBack;
+                if (File.Exists(Path.GetTempPath() + backupFileName))
+                {
+                    State = UpdaterState.RollingBack;
 
-                                     // Move downloaded exe to the correct folder.
-                                     File.Move(Path.GetTempPath() + backupFileName, originalInstallPath, true);
+                    // Move downloaded exe to the correct folder.
+                    File.Move(Path.GetTempPath() + backupFileName, originalInstallPath, true);
 
-                                     State = UpdaterState.Idle;
-                                 }
-                                 else
-                                 {
-                                     throw new FileNotFoundException("Backup file not found");
-                                 }
-                             });
+                    State = UpdaterState.Idle;
+                }
+                else
+                {
+                    throw new FileNotFoundException("Backup file not found");
+                }
             }
             catch (Exception)
             {
