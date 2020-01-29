@@ -71,7 +71,7 @@ namespace GithubUpdater
         public Updater(string githubUsername, string githubRepositoryName, bool rollBackOnFail) : this(githubUsername, githubRepositoryName)
         {
             if (rollBackOnFail)
-                InstallationFailed += async (s, e) => { await RollbackAsync(); };
+                InstallationFailed += async (s, e) => { await Rollback(); };
         }
 
         /// <summary>
@@ -303,12 +303,12 @@ namespace GithubUpdater
                 if (File.Exists(tempPath))
                     File.Delete(tempPath);
 
-                await Task.Delay(200);
+                await Task.Delay(100);
 
                 // Move current exe to backup.
                 File.Move(originalInstallPath, tempPath);
 
-                await Task.Delay(200);
+                await Task.Delay(100);
 
                 // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, originalInstallPath);
@@ -328,7 +328,7 @@ namespace GithubUpdater
         /// </summary>
         /// <returns>Awaitable Task</returns>
         ///  <exception cref="FileNotFoundException">Thrown when the backup file could not be found</exception>
-        public async Task RollbackAsync()
+        public void Rollback()
         {
             try
             {
