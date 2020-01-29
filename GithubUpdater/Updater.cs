@@ -32,7 +32,7 @@ namespace GithubUpdater
         /// <summary>
         /// Called when the installation failed
         /// </summary>
-        public event EventHandler InstallationFailed;
+        public event EventHandler<ExceptionEventArgs<Exception>> InstallationFailed;
         /// <summary>
         /// Called when a installation is completed
         /// </summary>
@@ -56,11 +56,14 @@ namespace GithubUpdater
         private Repository repository;
         private string downloadedAssetPath;
         private WebClient client;
+        private string originalInstallPath;
 
         public Updater(string githubUsername, string githubRepositoryName)
         {
             GithubUsername = githubUsername;
             GithubRepositoryName = githubRepositoryName;
+
+            originalInstallPath = Process.GetCurrentProcess().MainModule.FileName;
         }
 
         public Updater(string githubUsername, string githubRepositoryName, bool rollBackOnFail) : this(githubUsername, githubRepositoryName)
@@ -259,15 +262,19 @@ namespace GithubUpdater
 
             try
             {
+                string tempPath = Path.GetTempPath() + "GithubUpdaterBackup.backup";
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+
                 // Move current exe to backup.
-                File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup", true);
+                File.Move(originalInstallPath, tempPath, true);
 
                 // Move downloaded exe to the correct folder.
-                File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
+                File.Move(downloadedAssetPath, originalInstallPath, true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                InstallationFailed?.Invoke(this, EventArgs.Empty);
+                InstallationFailed?.Invoke(this, new ExceptionEventArgs<Exception>(ex, ex.Message));
             }
 
             State = UpdaterState.Idle;
@@ -291,16 +298,20 @@ namespace GithubUpdater
             {
                 await Task.Run(() =>
                                {
+                                   string tempPath = Path.GetTempPath() + "GithubUpdaterBackup.backup";
+                                   if (File.Exists(tempPath))
+                                       File.Delete(tempPath);
+
                                    // Move current exe to backup.
-                                   File.Move(Process.GetCurrentProcess().MainModule.FileName, Path.GetTempPath() + "GithubUpdaterBackup.backup", true);
+                                   File.Move(originalInstallPath, tempPath, true);
 
                                    // Move downloaded exe to the correct folder.
-                                   File.Move(downloadedAssetPath, Environment.CurrentDirectory + "\\" + repository.Assets[0].Name, true);
+                                   File.Move(downloadedAssetPath, originalInstallPath, true);
                                });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                InstallationFailed?.Invoke(this, EventArgs.Empty);
+                InstallationFailed?.Invoke(this, new ExceptionEventArgs<Exception>(ex, ex.Message));
             }
 
             State = UpdaterState.Idle;
@@ -314,22 +325,28 @@ namespace GithubUpdater
         ///  <exception cref="FileNotFoundException">Thrown when the backup file could not be found</exception>
         public async Task RollbackAsync()
         {
-            await Task.Run(() =>
+            try
             {
-                if (File.Exists(Path.GetTempPath() + "GithubUpdaterBackup.backup"))
-                {
-                    State = UpdaterState.RollingBack;
+                await Task.Run(() =>
+                             {
+                                 if (File.Exists(Path.GetTempPath() + "GithubUpdaterBackup.backup"))
+                                 {
+                                     State = UpdaterState.RollingBack;
 
-                    // Move downloaded exe to the correct folder.
-                    File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", Process.GetCurrentProcess().MainModule.FileName, true);
+                                     // Move downloaded exe to the correct folder.
+                                     File.Move(Path.GetTempPath() + "GithubUpdaterBackup.backup", originalInstallPath, true);
 
-                    State = UpdaterState.Idle;
-                }
-                else
-                {
-                    throw new FileNotFoundException("Backup file not found");
-                }
-            });
+                                     State = UpdaterState.Idle;
+                                 }
+                                 else
+                                 {
+                                     throw new FileNotFoundException("Backup file not found");
+                                 }
+                             });
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public void Dispose()
@@ -337,42 +354,42 @@ namespace GithubUpdater
             repository = null;
             client.Dispose();
 
-            // Remove all listeners to events
-            foreach (Delegate item in UpdateAvailable.GetInvocationList())
-            {
-                UpdateAvailable -= (EventHandler<VersionEventArgs>)item;
-            }
-            UpdateAvailable = null;
-            foreach (Delegate item in DownloadingStarted.GetInvocationList())
-            {
-                DownloadingStarted -= (EventHandler)item;
-            }
-            DownloadingStarted = null;
-            foreach (Delegate item in DownloadingProgressed.GetInvocationList())
-            {
-                DownloadingProgressed -= (EventHandler<DownloadProgressEventArgs>)item;
-            }
-            DownloadingProgressed = null;
-            foreach (Delegate item in DownloadingCompleted.GetInvocationList())
-            {
-                DownloadingCompleted -= (EventHandler)item;
-            }
-            DownloadingCompleted = null;
-            foreach (Delegate item in InstallationStarted.GetInvocationList())
-            {
-                InstallationStarted -= (EventHandler)item;
-            }
-            InstallationStarted = null;
-            foreach (Delegate item in InstallationFailed.GetInvocationList())
-            {
-                InstallationFailed -= (EventHandler)item;
-            }
-            InstallationFailed = null;
-            foreach (Delegate item in InstallationCompleted.GetInvocationList())
-            {
-                InstallationCompleted -= (EventHandler)item;
-            }
-            InstallationCompleted = null;
+            //// Remove all listeners to events
+            //foreach (Delegate item in UpdateAvailable.GetInvocationList())
+            //{
+            //    UpdateAvailable -= (EventHandler<VersionEventArgs>)item;
+            //}
+            //UpdateAvailable = null;
+            //foreach (Delegate item in DownloadingStarted.GetInvocationList())
+            //{
+            //    DownloadingStarted -= (EventHandler)item;
+            //}
+            //DownloadingStarted = null;
+            //foreach (Delegate item in DownloadingProgressed.GetInvocationList())
+            //{
+            //    DownloadingProgressed -= (EventHandler<DownloadProgressEventArgs>)item;
+            //}
+            //DownloadingProgressed = null;
+            //foreach (Delegate item in DownloadingCompleted.GetInvocationList())
+            //{
+            //    DownloadingCompleted -= (EventHandler)item;
+            //}
+            //DownloadingCompleted = null;
+            //foreach (Delegate item in InstallationStarted.GetInvocationList())
+            //{
+            //    InstallationStarted -= (EventHandler)item;
+            //}
+            //InstallationStarted = null;
+            //foreach (Delegate item in InstallationFailed.GetInvocationList())
+            //{
+            //    InstallationFailed -= (EventHandler<ExceptionEventArgs<Exception>>)item;
+            //}
+            //InstallationFailed = null;
+            //foreach (Delegate item in InstallationCompleted.GetInvocationList())
+            //{
+            //    InstallationCompleted -= (EventHandler)item;
+            //}
+            //InstallationCompleted = null;
         }
     }
 }

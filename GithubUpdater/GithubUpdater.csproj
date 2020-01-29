@@ -2,13 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.7</Version>
+    <Version>0.7.2</Version>
     <ApplicationIcon></ApplicationIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Added Exception documentation
-Added IEquatable&lt;Version&gt;
-</PackageReleaseNotes>
+    <PackageReleaseNotes>Added basic exception handling to RollbackAsync
+Added ExceptionEventArgs</PackageReleaseNotes>
     <Authors>Williamhk</Authors>
     <Company />
     <PackageLicenseFile>License.txt</PackageLicenseFile>
@@ -19,7 +18,9 @@ Added IEquatable&lt;Version&gt;
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/Will1400/GithubUpdater</RepositoryUrl>
     <RepositoryType>Open Source</RepositoryType>
-    <Description>A updater for github that works with single exe files</Description>
+    <Description>A updater for github that works with single exe files
+
+Release tag should be in the format: v(Major).(Minor).(Revision) or (Major).(Minor).(Revision)</Description>
     <PackageIcon></PackageIcon>
     <PackageIconUrl />
     <Win32Resource />
