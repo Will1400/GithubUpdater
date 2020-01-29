@@ -71,7 +71,7 @@ namespace GithubUpdater
         public Updater(string githubUsername, string githubRepositoryName, bool rollBackOnFail) : this(githubUsername, githubRepositoryName)
         {
             if (rollBackOnFail)
-                InstallationFailed += async (s, e) => { await Rollback(); };
+                InstallationFailed += (s, e) => { Rollback(); };
         }
 
         /// <summary>
