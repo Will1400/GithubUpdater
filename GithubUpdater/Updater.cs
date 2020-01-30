@@ -56,11 +56,11 @@ namespace GithubUpdater
 
         private const string baseUri = "https://api.github.com/repos/";
         private Repository repository;
-        private string downloadedAssetPath;
         private WebClient client;
-        private string originalInstallPath;
+        private string downloadedAssetPath;
+        private readonly string originalInstallPath;
 
-        private string backupFileName = "GithubUpdaterBackup.backup";
+        private readonly string backupFileName = "GithubUpdaterBackup.backup";
 
         public Updater(string githubUsername, string githubRepositoryName)
         {
