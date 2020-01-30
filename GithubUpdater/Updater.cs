@@ -269,7 +269,7 @@ namespace GithubUpdater
                     File.Delete(tempPath);
 
                 // Move current exe to backup.
-                File.Move(originalInstallPath, tempPath, true);
+                File.Move(originalInstallPath, tempPath);
 
                 // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, originalInstallPath, true);
