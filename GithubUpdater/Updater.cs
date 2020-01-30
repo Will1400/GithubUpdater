@@ -250,9 +250,12 @@ namespace GithubUpdater
             DownloadingProgressed?.Invoke(this, new DownloadProgressEventArgs(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive));
         }
 
+    
+
         /// <summary>
         /// Makes a backup of the current EXE, then overwrites it with the new EXE.
         /// </summary>
+        /// <returns>Awaitable Task</returns>
         ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
         public void InstallUpdate()
         {
@@ -268,47 +271,9 @@ namespace GithubUpdater
                 if (File.Exists(tempPath))
                     File.Delete(tempPath);
 
-                // Move current exe to backup.
-                File.Move(originalInstallPath, tempPath);
-
-                // Move downloaded exe to the correct folder.
-                File.Move(downloadedAssetPath, originalInstallPath, true);
-            }
-            catch (Exception ex)
-            {
-                InstallationFailed?.Invoke(this, new ExceptionEventArgs<Exception>(ex, ex.Message));
-                return;
-            }
-
-            State = UpdaterState.Idle;
-            InstallationCompleted?.Invoke(this, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// Makes a backup of the current EXE, then overwrites it with the new EXE.
-        /// </summary>
-        /// <returns>Awaitable Task</returns>
-        ///  <exception cref="NullReferenceException">Thrown when the Repository is null</exception>
-        public async Task InstallUpdateAsync()
-        {
-            InstallationStarted?.Invoke(this, EventArgs.Empty);
-            State = UpdaterState.Installing;
-
-            if (repository == null)
-                throw new NullReferenceException("Could not retrieve Repository");
-
-            try
-            {
-                string tempPath = Path.GetTempPath() + backupFileName;
-                if (File.Exists(tempPath))
-                    File.Delete(tempPath);
-
-                await Task.Delay(100);
 
                 // Move current exe to backup.
                 File.Move(originalInstallPath, tempPath);
-
-                await Task.Delay(100);
 
                 // Move downloaded exe to the correct folder.
                 File.Move(downloadedAssetPath, originalInstallPath);
