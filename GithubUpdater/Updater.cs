@@ -52,6 +52,8 @@ namespace GithubUpdater
         /// </summary>
         public UpdaterState State { get; private set; }
 
+        public string LatestReleaseLink => $"https://github.com/{GithubUsername}/{GithubRepositoryName}/releases/latest";
+
         private const string baseUri = "https://api.github.com/repos/";
         private Repository repository;
         private string downloadedAssetPath;
@@ -249,8 +251,6 @@ namespace GithubUpdater
         {
             DownloadingProgressed?.Invoke(this, new DownloadProgressEventArgs(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive));
         }
-
-    
 
         /// <summary>
         /// Makes a backup of the current EXE, then overwrites it with the new EXE.
